@@ -1,100 +1,142 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>CAR Anfrage</title>
 
 <style>
-body{
-font-family:Arial;
-text-align:center;
-margin-top:80px;
-background:#f5f5f5;
-}
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 40px 15px 60px;
+    background: #f5f7fb;
+    color: #222;
+  }
 
-h1{
-margin-bottom:40px;
-}
+  .logo {
+    width: 260px;
+    max-width: 80%;
+    margin: 0 auto 40px auto;
+    display: block;
+  }
 
-button{
-font-size:22px;
-padding:18px 40px;
-margin:15px;
-border:none;
-background:#0077cc;
-color:white;
-border-radius:8px;
-cursor:pointer;
-}
+  h1 {
+    margin-bottom: 30px;
+    font-weight: 700;
+    color: #0a3d62;
+  }
 
-button:hover{
-background:#005fa3;
-}
+  button {
+    font-size: 22px;
+    padding: 16px 50px;
+    margin: 12px;
+    border: none;
+    background: #0077cc;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    min-width: 140px;
+  }
 
-#form{
-display:none;
-margin-top:30px;
-}
+  button:hover,
+  button:focus {
+    background: #005fa3;
+    outline: none;
+  }
 
-input{
-font-size:18px;
-padding:12px;
-width:260px;
-border-radius:6px;
-border:1px solid #ccc;
-}
+  #form {
+    display: none;
+    margin-top: 40px;
+  }
+
+  input[type="email"] {
+    font-size: 18px;
+    padding: 12px 15px;
+    width: 260px;
+    max-width: 90vw;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+  }
+
+  p.instruction {
+    font-size: 16px;
+    margin-top: 10px;
+    color: #555;
+    max-width: 320px;
+    margin-left: auto;
+    margin-right: auto;
+  }
 </style>
-
 </head>
-
 <body>
 
-<h1>Bitte Auswahl treffen</h1>
+  <img src="CAR_Logo.png" alt="CAR Logo" class="logo" />
 
-<button onclick="selectOption('Abisco')">Abisco</button>
-<button onclick="selectOption('PartX')">PartX</button>
+  <h1>Bitte Auswahl treffen</h1>
+  <p class="instruction">Bitte wählen Sie das System und geben Sie anschließend Ihre E-Mail-Adresse ein.</p>
 
-<div id="form">
+  <button onclick="selectOption('Abisco')">Abisco</button>
+  <button onclick="selectOption('PartX')">PartX</button>
 
-<h2 id="selected"></h2>
+  <div id="form">
+    <h2 id="selected"></h2>
+    <input type="email" id="email" placeholder="Ihre Mailadresse" required />
+    <br /><br />
+    <button onclick="send()">Senden</button>
+  </div>
 
-<input type="email" id="email" placeholder="Ihre Mailadresse">
+  <script>
+    let option = "";
 
-<br><br>
+    function selectOption(o) {
+      option = o;
+      document.getElementById("form").style.display = "block";
+      document.getElementById("selected").innerText = "Auswahl: " + o;
+      // Scroll zum Formular für bessere UX
+      document.getElementById("form").scrollIntoView({behavior: "smooth"});
+    }
 
-<button onclick="send()">Senden</button>
+    function send() {
+      const emailInput = document.getElementById("email");
+      const email = emailInput.value.trim();
 
-</div>
+      if (!email || !validateEmail(email)) {
+        alert("Bitte geben Sie eine gültige E-Mail-Adresse ein.");
+        emailInput.focus();
+        return;
+      }
 
-<script>
+      fetch("https://formsubmit.co/ajax/edv@car-gmbh.de", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          Auswahl: option,
+          Email: email
+        }),
+      })
+        .then(response => {
+          if (response.ok) {
+            alert("Vielen Dank! Ihre Anfrage wurde gesendet.");
+            emailInput.value = "";
+            document.getElementById("form").style.display = "none";
+          } else {
+            alert("Fehler beim Senden. Bitte versuchen Sie es später erneut.");
+          }
+        })
+        .catch(() => {
+          alert("Fehler beim Senden. Bitte prüfen Sie Ihre Internetverbindung.");
+        });
+    }
 
-let option="";
-
-function selectOption(o){
-option=o;
-document.getElementById("form").style.display="block";
-document.getElementById("selected").innerText="Auswahl: "+o;
-}
-
-function send(){
-
-let email=document.getElementById("email").value;
-
-fetch("https://formsubmit.co/ajax/edv@car-gmbh.de",{
-method:"POST",
-headers:{
-'Content-Type':'application/json'
-},
-body:JSON.stringify({
-Auswahl: option,
-Email: email
-})
-})
-.then(response => alert("Vielen Dank! Anfrage wurde gesendet."));
-
-}
-
-</script>
+    function validateEmail(email) {
+      // einfache Mailprüfung
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(email);
+    }
+  </script>
 
 </body>
 </html>
